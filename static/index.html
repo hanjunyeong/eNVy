@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>eNVy · 파일 검사</title>
+<style>
+:root{font-family:Arial,"Malgun Gothic",sans-serif;color:#f1f1f3;background:#080809;--muted:#96969f;--line:#29292d;--red:#f23b49}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.42}button:focus-visible,a:focus-visible,.drop:focus-within{outline:3px solid #ff6873;outline-offset:5px}header{height:80px;max-width:1100px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #202023}.wordmark{font-size:24px;font-weight:800;letter-spacing:-1px}.wordmark span{color:var(--red)}.tag{color:#aaaab3;font-size:12px;letter-spacing:2px}.tag i{display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:9px}main{max-width:940px;margin:0 auto;padding:25px 32px 50px}.hero{text-align:center}.logo{display:block;width:310px;max-width:90%;height:auto;margin:0 auto 8px}.eyebrow{font-size:10px;font-weight:700;letter-spacing:3px;color:#e65a64;margin:0 0 14px}h1{font-size:34px;letter-spacing:-1.6px;margin:0 0 12px;line-height:1.3}.intro{font-size:14px;color:var(--muted);line-height:1.8;margin:0}.workflow{display:flex;align-items:center;justify-content:center;gap:15px;color:#777780;font-size:11px;margin:29px 0}.workflow b{color:#d2d2d8;font-weight:500}.workflow .line{width:38px;height:1px;background:#35353b}.workflow span{white-space:nowrap}.workspace{display:grid;grid-template-columns:1.08fr 1fr;gap:18px;align-items:stretch}.panel{background:#111113;border:1px solid var(--line);border-radius:18px;padding:25px}.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.panel h2{font-size:15px;margin:0}.step{font:11px monospace;color:#72727d}.drop{border:1px dashed #45454e;border-radius:12px;min-height:192px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;transition:border-color .2s,background .2s;padding:20px;cursor:pointer}.drop:hover,.drop.drag{border-color:var(--red);background:#1c1216}.drop.busy{pointer-events:none;opacity:.6}.drop input{position:absolute;width:1px;height:1px;opacity:0}.upload-icon{width:40px;height:40px;color:#e8e8ed;margin-bottom:17px}.drop strong{font-size:14px;font-weight:500;line-height:1.6}.drop small{font-size:11px;color:var(--muted);margin-top:9px}.choose{color:#ff6570;border-bottom:1px solid #93414a;padding-bottom:2px}.file-meta{font-size:11px;line-height:1.7;color:#aeafb8;margin:13px 0;min-height:20px;overflow-wrap:anywhere}.submit{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;border-radius:9px;background:var(--red);color:white;font-weight:700;font-size:14px;min-height:47px}.submit:hover:enabled{background:#ff4d5b}.result-panel{display:flex;flex-direction:column}.badge{font-size:10px;color:#b1b1ba;border:1px solid #3b3b43;border-radius:100px;padding:5px 8px}.result-body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:250px}.status-icon{display:grid;place-items:center;width:48px;height:48px;border:1px solid #37373f;background:#1b1b20;border-radius:50%;color:#a5a5b0;font-size:22px;margin-bottom:18px}.result-body h3{font-size:20px;letter-spacing:-.6px;margin:0 0 10px}.description{color:var(--muted);font-size:12px;line-height:1.8;margin:0;max-width:260px;overflow-wrap:anywhere}.metrics{width:100%;margin-top:22px;border-top:1px solid var(--line);padding-top:16px;text-align:left}.score-line{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#b0b0ba}.score-line strong{font:22px monospace;color:#f0f0f5}.scale{height:5px;background:#2b2b32;border-radius:10px;margin:12px 0 7px;position:relative}.scale:after{content:"";position:absolute;left:50%;height:11px;top:-3px;width:1px;background:#9b9ba5}.fill{height:100%;border-radius:10px;background:var(--red);min-width:2px}.scale-labels{display:flex;justify-content:space-between;font-size:9px;color:#85858f}.score-note{font-size:10px;line-height:1.6;color:#898994;margin:14px 0 0}.result-panel.safe .status-icon{color:#7fd7b2;background:#10251e;border-color:#255941}.result-panel.safe .badge{color:#83d9b4;border-color:#255941}.result-panel.safe .fill{background:#72cfaa}.result-panel.danger .status-icon{color:#ff7c85;background:#30151b;border-color:#6b2e38}.result-panel.danger .badge{color:#ff7c85;border-color:#6b2e38}.result-panel.error .status-icon{color:#ffbf7c;border-color:#805d36}.spinner{display:inline-block;width:17px;height:17px;border:2px solid #ffffff40;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite}.status-icon .spinner{width:23px;height:23px}@keyframes spin{to{transform:rotate(360deg)}}[hidden]{display:none!important}.footnote{display:flex;gap:10px;margin:20px 2px 0;color:#8b8b95;font-size:11px;line-height:1.9}.footnote svg{flex-shrink:0;margin-top:3px}footer{border-top:1px solid #202023;margin-top:35px;padding-top:18px;display:flex;justify-content:space-between;gap:20px;font-size:10px;color:#686873;line-height:1.8}.engine{letter-spacing:1px}@media(max-width:680px){header{padding:0 22px;height:65px}.tag{font-size:9px;letter-spacing:1px}main{padding:20px 20px 35px}.logo{width:260px}h1{font-size:27px}.intro{font-size:12px}.workspace{grid-template-columns:1fr}.panel{padding:22px}.result-body{min-height:210px}.workflow{gap:10px;margin:25px 0}.workflow .line{width:25px}footer{flex-direction:column;gap:5px}.footnote{font-size:10px}}@media(prefers-reduced-motion:reduce){*{animation-duration:2s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wordmark">e<span>NV</span>y</div><div class="tag"><i></i>FILE ANALYSIS</div></header>
+<main>
+<section class="hero" aria-labelledby="title">
+<img class="logo" src="/static/envy.png" alt="빨간 NV와 뿔이 있는 eNVy 로고" width="1776" height="888">
+<p class="eyebrow">LOOK INSIDE. STAY AWARE.</p>
+<h1 id="title">실행하기 전에, 확인하세요.</h1>
+<p class="intro">Windows 실행 파일의 특징을 분석하고<br>머신러닝 모델의 악성 의심 점수를 확인하세요.</p>
+</section>
+<div class="workflow" aria-label="검사 과정"><span><b>01</b> 파일 업로드</span><i class="line"></i><span><b>02</b> 정적 분석</span><i class="line"></i><span><b>03</b> 결과 확인</span></div>
+<div class="workspace">
+<section class="panel" aria-labelledby="upload-title">
+<div class="panel-head"><h2 id="upload-title">파일 업로드</h2><span class="step">01 / UPLOAD</span></div>
+<form id="scan-form">
+<label class="drop" id="drop">
+<input type="file" id="file" accept=".exe,.dll" aria-label="검사할 exe 또는 dll 파일 선택" aria-describedby="file-meta">
+<svg class="upload-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 26V6m0 0-7 7m7-7 7 7M7 25v8a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<strong id="drop-title">파일을 여기에 놓거나<br><span class="choose">클릭해서 선택하세요</span></strong>
+<small>.exe · .dll &nbsp; / &nbsp; 최대 10 MiB</small>
+</label>
+<p class="file-meta" id="file-meta">선택한 파일이 없습니다.</p>
+<button class="submit" id="submit" type="submit" disabled><span class="spinner" id="button-spinner" hidden></span><span id="button-label">파일 검사하기</span><span aria-hidden="true" id="arrow">→</span></button>
+</form>
+</section>
+<section class="panel result-panel" id="result-panel" aria-labelledby="result-title" aria-busy="false">
+<div class="panel-head"><h2 id="result-title">분석 결과</h2><span class="badge" id="badge">대기 중</span></div>
+<div class="result-body" role="status" aria-live="polite" aria-atomic="true">
+<div class="status-icon" id="status-icon" aria-hidden="true">⌕</div>
+<h3 id="verdict">검사할 파일을 선택하세요</h3>
+<p class="description" id="description">분석이 완료되면 이곳에<br>판정과 모델 점수가 표시됩니다.</p>
+<div class="metrics" id="metrics" hidden>
+<div class="score-line"><span>악성 모델 점수</span><strong id="score">—</strong></div>
+<div class="scale" aria-hidden="true"><div class="fill" id="fill"></div></div>
+<div class="scale-labels"><span>0</span><span>기준값 0.5</span><span>1</span></div>
+<p class="score-note">점수가 높을수록 모델이 악성 쪽으로 판단합니다.<br>실제 악성 확률을 의미하지 않습니다.</p>
+</div>
+</div>
+</section>
+</div>
+<p class="footnote"><svg width="15" height="17" viewBox="0 0 15 17" fill="none" aria-hidden="true"><path d="m7.5 1 6 2.5v5c0 3-3 5.5-6 7-3-1.5-6-4-6-7v-5L7.5 1Z" stroke="currentColor"/><path d="m4.5 8 2 2 4-4" stroke="currentColor"/></svg><span>파일을 실행하지 않는 정적 분석 방식입니다. 모델의 추정 결과이며, ‘정상으로 추정’ 결과도 파일의 안전을 보장하지 않습니다.</span></p>
+<footer><span class="engine">POWERED BY EMBER2024 · LIGHTGBM</span><span>Windows PE 파일 분석 · eNVy</span></footer>
+</main>
+<script>
+'use strict';
+const el = id => document.getElementById(id);
+const form=el('scan-form'), input=el('file'), drop=el('drop'), submit=el('submit');
+let selectedFile=null, busy=false;
+function result(kind,title,message,badge){
+  el('result-panel').className='panel result-panel '+kind;
+  el('badge').textContent=badge;
+  el('verdict').textContent=title;
+  el('description').textContent=message;
+  el('metrics').hidden=true;
+  const icon=el('status-icon');
+  icon.replaceChildren();
+  if(kind==='loading'){const spinner=document.createElement('span');spinner.className='spinner';icon.append(spinner);}
+  else icon.textContent=kind==='safe'?'✓':kind==='danger'?'!':kind==='error'?'!':'⌕';
+}
+function setBusy(value){
+  busy=value; input.disabled=value; submit.disabled=value||!selectedFile;
+  drop.classList.toggle('busy',value);
+  el('result-panel').setAttribute('aria-busy',String(value));
+  el('button-spinner').hidden=!value;el('arrow').hidden=value;
+  el('button-label').textContent=value?'파일 분석 중…':'파일 검사하기';
+}
+function selectFile(file){
+  if(busy)return;
+  selectedFile=null;submit.disabled=true;
+  if(!file){el('file-meta').textContent='선택한 파일이 없습니다.';return;}
+  el('file-meta').textContent=file.name+' · '+(file.size/1024/1024).toFixed(2)+' MiB';
+  let error='';
+  if(!/\.(exe|dll)$/i.test(file.name))error='.exe 또는 .dll 파일을 선택해 주세요.';
+  else if(!file.size)error='빈 파일은 분석할 수 없습니다.';
+  else if(file.size>10*1024*1024)error='10 MiB 이하의 파일을 선택해 주세요.';
+  if(error){input.value='';result('error','파일을 확인해 주세요',error,'선택 오류');return;}
+  selectedFile=file;submit.disabled=false;
+  result('','검사 준비가 됐습니다','파일 검사하기 버튼을 누르면 분석을 시작합니다.','준비 완료');
+}
+input.addEventListener('change',()=>selectFile(input.files[0]));
+for(const name of ['dragenter','dragover'])drop.addEventListener(name,event=>{event.preventDefault();if(!busy)drop.classList.add('drag');});
+drop.addEventListener('dragleave',event=>{if(!drop.contains(event.relatedTarget))drop.classList.remove('drag');});
+drop.addEventListener('drop',event=>{
+  event.preventDefault();drop.classList.remove('drag');if(busy)return;
+  input.value='';
+  if(event.dataTransfer.files.length!==1){selectedFile=null;submit.disabled=true;el('file-meta').textContent='선택한 파일이 없습니다.';result('error','파일을 하나만 선택해 주세요','한 번에 한 파일씩 검사할 수 있습니다.','선택 오류');return;}
+  selectFile(event.dataTransfer.files[0]);
+});
+// 브라우저가 드롭된 파일로 이동하는 것을 방지합니다.
+window.addEventListener('dragover',event=>event.preventDefault());
+window.addEventListener('drop',event=>event.preventDefault());
+form.addEventListener('submit',async event=>{
+  event.preventDefault();if(busy||!selectedFile)return;
+  const file=selectedFile;const data=new FormData();data.append('file',file);
+  setBusy(true);result('loading','파일을 분석하고 있습니다','특징을 추출한 뒤 모델 점수를 계산합니다. 잠시 기다려 주세요.','분석 중');
+  try{
+    const response=await fetch('/scan',{method:'POST',body:data});
+    let output;try{output=await response.json();}catch{throw new Error('서버 응답을 읽을 수 없습니다. 서버 상태를 확인해 주세요.');}
+    if(!response.ok)throw new Error(typeof output.detail==='string'?output.detail:'분석에 실패했습니다. 다른 파일로 다시 시도해 주세요.');
+    if(typeof output.score!=='number'||!Number.isFinite(output.score)||output.score<0||output.score>1||typeof output.verdict!=='string'||typeof output.filename!=='string')throw new Error('분석 결과 형식이 올바르지 않습니다.');
+    result(output.score>=0.5?'danger':'safe',output.verdict,output.filename,'분석 완료');
+    el('score').textContent=output.score.toFixed(6);el('fill').style.width=(output.score*100)+'%';el('metrics').hidden=false;
+  }catch(error){result('error','분석하지 못했습니다',error instanceof TypeError?'서버에 연결할 수 없습니다. 서버 실행 상태를 확인해 주세요.':error.message,'분석 오류');}
+  finally{setBusy(false);}
+});
+</script>
+</body>
+</html>
