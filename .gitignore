@@ -18,3 +18,5 @@ models/
 # 성능 평가 데이터
 evaluation_data/
 evaluation_results/
+
+*.txt

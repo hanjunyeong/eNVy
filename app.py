@@ -1,22 +1,33 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
-import logging
-import math
-from threading import Lock
 
-import lightgbm as lgb
-import pefile
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from thrember.model import predict_sample
-from pe_details import analyze_pe
+
+from scan_manager import ScanError, ScanManager
+from scan_config import MAX_FILE_SIZE, SCAN_TIMEOUT_SECONDS, MAX_CONCURRENT_SCANS, public_config
 
 BASE_DIR = Path(__file__).resolve().parent
-MAX_SIZE = 10 * 1024 * 1024
-app = FastAPI(title="eNVy")
+
+
+@asynccontextmanager
+async def lifespan(app):
+    app.state.scans = ScanManager(
+        BASE_DIR / "scan_worker.py", BASE_DIR / "models" / "EMBER2024_PE.model",
+        timeout_seconds=SCAN_TIMEOUT_SECONDS, max_concurrent=MAX_CONCURRENT_SCANS,
+        max_file_size=MAX_FILE_SIZE,
+    )
+    try:
+        yield
+    finally:
+        # close() can wait briefly for child processes; do not block the event loop.
+        from starlette.concurrency import run_in_threadpool
+        await run_in_threadpool(app.state.scans.close)
+
+
+app = FastAPI(title="eNVy", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-model = lgb.Booster(model_file=str(BASE_DIR / "models" / "EMBER2024_PE.model"))
-model_lock = Lock()
 
 
 @app.get("/", response_class=FileResponse)
@@ -24,47 +35,28 @@ def home():
     return FileResponse(BASE_DIR / "static" / "index.html")
 
 
+@app.get("/health")
+def health(request: Request):
+    return {"status": "ok", **request.app.state.scans.status(),
+            "model_available": (BASE_DIR / "models" / "EMBER2024_PE.model").is_file()}
+
+
+@app.get("/config")
+def config():
+    return public_config()
+
+
 @app.post("/scan")
-def scan(file: UploadFile):
-    # 업로드 파일을 프로그램으로 실행하지 않습니다.
+def scan(request: Request, file: UploadFile):
     try:
-        file_data = file.file.read(MAX_SIZE + 1)
+        if Path(file.filename or "").suffix.lower() not in {".exe", ".dll"}:
+            raise HTTPException(400, ".exe 또는 .dll 파일을 선택해 주세요.")
+        if file.size is not None and file.size > MAX_FILE_SIZE:
+            raise HTTPException(413, public_config()["max_file_size_label"] + " 이하의 파일을 선택해 주세요.")
+        result = request.app.state.scans.scan_file(file.file)
+    except ScanError as error:
+        headers = {"Retry-After": "1"} if error.status_code == 429 else None
+        raise HTTPException(error.status_code, error.detail, headers=headers) from None
     finally:
         file.file.close()
-    if not file_data:
-        raise HTTPException(400, "빈 파일입니다.")
-    if len(file_data) > MAX_SIZE:
-        raise HTTPException(413, "10 MiB 이하의 파일을 선택해 주세요.")
-    if Path(file.filename or "").suffix.lower() not in {".exe", ".dll"}:
-        raise HTTPException(400, ".exe 또는 .dll 파일을 선택해 주세요.")
-    try:
-        pe = pefile.PE(data=file_data, fast_load=True)
-    except pefile.PEFormatError:
-        raise HTTPException(400, "분석 가능한 Windows PE 파일이 아닙니다.")
-    # 상세정보와 모델 추론을 구분합니다. 상세정보의 일부가 손상되어도
-    # 모델 분석이 가능하면 기존 판정 결과를 반환합니다.
-    details = None
-    details_error = None
-    try:
-        details = analyze_pe(file_data, pe)
-    except Exception:
-        logging.exception("PE metadata extraction failed")
-        details_error = "상세정보 일부를 읽지 못했습니다. 모델 판정과 별도로 확인해 주세요."
-    finally:
-        pe.close()
-    try:
-        # 동시에 들어온 요청의 모델 추론을 순서대로 처리합니다.
-        with model_lock:
-            score = float(predict_sample(model, file_data))
-        if not math.isfinite(score) or not 0 <= score <= 1:
-            raise ValueError("Invalid model score")
-    except Exception:
-        logging.exception("PE feature extraction or prediction failed")
-        raise HTTPException(422, "이 파일의 특징 추출 또는 모델 분석에 실패했습니다.")
-    return {
-        "filename": file.filename,
-        "score": score,
-        "verdict": "악성으로 의심" if score >= 0.5 else "정상으로 추정",
-        "details": details,
-        "details_error": details_error,
-    }
+    return {"filename": file.filename, **result}
