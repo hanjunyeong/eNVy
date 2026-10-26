@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from thrember.model import predict_sample
+from pe_details import analyze_pe
 
 BASE_DIR = Path(__file__).resolve().parent
 MAX_SIZE = 10 * 1024 * 1024
@@ -38,9 +39,19 @@ def scan(file: UploadFile):
         raise HTTPException(400, ".exe 또는 .dll 파일을 선택해 주세요.")
     try:
         pe = pefile.PE(data=file_data, fast_load=True)
-        pe.close()
     except pefile.PEFormatError:
         raise HTTPException(400, "분석 가능한 Windows PE 파일이 아닙니다.")
+    # 상세정보와 모델 추론을 구분합니다. 상세정보의 일부가 손상되어도
+    # 모델 분석이 가능하면 기존 판정 결과를 반환합니다.
+    details = None
+    details_error = None
+    try:
+        details = analyze_pe(file_data, pe)
+    except Exception:
+        logging.exception("PE metadata extraction failed")
+        details_error = "상세정보 일부를 읽지 못했습니다. 모델 판정과 별도로 확인해 주세요."
+    finally:
+        pe.close()
     try:
         # 동시에 들어온 요청의 모델 추론을 순서대로 처리합니다.
         with model_lock:
@@ -54,4 +65,6 @@ def scan(file: UploadFile):
         "filename": file.filename,
         "score": score,
         "verdict": "악성으로 의심" if score >= 0.5 else "정상으로 추정",
+        "details": details,
+        "details_error": details_error,
     }
