@@ -26,7 +26,7 @@
   function elapsed() {
     if (processingStarted === null) return;
     const seconds = Math.floor((performance.now() - processingStarted) / 1000);
-    get('server-elapsed').textContent = '서버 처리 대기: ' + seconds + '초 · 파일 준비·분석·결과 수신 포함';
+    get('server-elapsed').textContent = '서버 처리 대기: ' + seconds + '초 · 준비·대기열·분석·결과 수신 포함';
   }
   const size = bytes => (bytes / 1024 / 1024).toFixed(1) + ' MiB';
   function send(file, onUploaded) {
@@ -45,12 +45,15 @@
         if (settled) return;
         settled = true;
         elapsed();
-        stopTimer();
         requestActive = false;
-        panel.dataset.state = error ? 'error' : 'complete';
-        get('upload-phase').textContent = error
-          ? (uploadComplete ? '업로드 완료 · 서버 처리 오류' : '업로드 중단')
-          : '업로드 완료 · 검사 완료';
+        if (error) {
+          stopTimer();
+          panel.dataset.state = 'error';
+          get('upload-phase').textContent = uploadComplete ? '업로드 완료 · 접수 오류' : '업로드 중단';
+        } else {
+          panel.dataset.state = 'processing';
+          get('upload-phase').textContent = '업로드 완료 · 작업 접수';
+        }
         if (error) reject(error); else resolve(output);
       }
       function uploaded() {
@@ -98,8 +101,8 @@
           finish(new Error('서버 응답을 읽을 수 없습니다.'));
           return;
         }
-        if (typeof output.score !== 'number' || !Number.isFinite(output.score) || output.score < 0 || output.score > 1 || typeof output.filename !== 'string' || typeof output.verdict !== 'string') {
-          finish(new Error('분석 결과 형식이 올바르지 않습니다.'));
+        if (typeof output.job_id !== 'string' || !/^[0-9a-f]{32}$/.test(output.job_id) || typeof output.status !== 'string') {
+          finish(new Error('작업 접수 응답 형식이 올바르지 않습니다.'));
           return;
         }
         // A successful scan response proves upload completion even if the
@@ -123,5 +126,10 @@
       }
     });
   }
-  window.envyUpload = {send, reset};
+  function jobStatus(label, terminal=false, error=false) {
+    get('upload-phase').textContent = label;
+    get('upload-status').dataset.state = terminal ? (error ? 'error' : 'complete') : 'processing';
+    if (terminal) { elapsed(); stopTimer(); }
+  }
+  window.envyUpload = {send, reset, jobStatus};
 })();
