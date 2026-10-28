@@ -1,0 +1,40 @@
+{
+  "created_utc": "2026-10-27T04:31:10.773383+00:00",
+  "environment": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.14",
+    "lightgbm": "4.6.0"
+  },
+  "model": {
+    "filename": "EMBER2024_PE.model",
+    "bytes": 3756042,
+    "sha256": "4252027863492ac138785c8c18576f43dad77d00faddc14e8c0072e8db419f99",
+    "features": 2568
+  },
+  "metric": "elapsed seconds around lgb.Booster(model_file=...) only",
+  "repeat": 10,
+  "seconds": [
+    0.03697659500176087,
+    0.012672991000727052,
+    0.006795730001613265,
+    0.007658885999262566,
+    0.007276905998878647,
+    0.011918034000700573,
+    0.009846594999544322,
+    0.011584142997890012,
+    0.01168827600122313,
+    0.009710094996989937
+  ],
+  "mean_seconds": 0.012612825099859037,
+  "median_seconds": 0.010715368998717167,
+  "min_seconds": 0.006795730001613265,
+  "max_seconds": 0.03697659500176087,
+  "sum_seconds": 0.12612825099859037,
+  "limitations": [
+    "The model was read for its SHA-256 before timing, so file pages may already have been cached.",
+    "Repeated loads in one process; operating-system file caches and scheduling are not controlled.",
+    "Does not measure server start, feature extraction, prediction, network or end-to-end speedup.",
+    "Different environments and warm-up conditions may produce different results."
+  ]
+}

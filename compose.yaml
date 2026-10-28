@@ -189,7 +189,7 @@ networks:
   internal:
     internal: true
   frontend:
-    driver: bridge
+    driver: bridge  
 
 
 volumes:
